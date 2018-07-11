@@ -1,13 +1,6 @@
 import pyglet
 from pyglet.gl import *
 
-# Global Variables
-PADDLESIZE = 50
-PADDLEOFFSET = 20
-LINETHICKNESS = 10
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-
 
 # Setup Window
 window = pyglet.window.Window(width=800, height=600)
