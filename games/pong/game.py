@@ -67,6 +67,21 @@ def draw_line(x1, y1, x2, y2, width=2):
     glEnd()
 
 
+def ai_player(ball_direction_x, ball_position_y, paddle_y):
+    # center the paddle when ball is moving away
+    if ball_direction_x == 1:
+        if (paddle_y + paddle_height / 2) < WINDOW_HEIGHT_HALF - paddle_height / 2:
+            paddle_y += paddle_speed
+        elif (paddle_y + paddle_height / 2) > WINDOW_HEIGHT_HALF + paddle_height / 2:
+            paddle_y -= paddle_speed
+    elif ball_direction_x == -1:
+        if (paddle_y + paddle_height / 2) < ball_position_y - paddle_height / 2:
+            paddle_y += paddle_speed
+        elif (paddle_y + paddle_height / 2) > ball_position_y + paddle_height / 2:
+            paddle_y -= paddle_speed
+    return paddle_y
+
+
 @window.event
 def on_draw():
     window.clear()
@@ -101,10 +116,13 @@ def update(dt):
     global paddle_speed, ball_speed, ball_size
     global paddle_width, paddle_height
 
-    if keys[key.W]:
-        paddle_left_y += paddle_speed
-    if keys[key.S]:
-        paddle_left_y -= paddle_speed
+    if not computer_player:
+        if keys[key.W]:
+            paddle_left_y += paddle_speed
+        if keys[key.S]:
+            paddle_left_y -= paddle_speed
+    else:
+        paddle_left_y = ai_player(ball_dir_x, ball_pos_y, paddle_left_y)
 
     if keys[key.UP]:
         paddle_right_y += paddle_speed
@@ -167,6 +185,7 @@ def update(dt):
 
 
 if __name__ == '__main__':
+    computer_player = True
     init()
     pyglet.clock.schedule_interval(update, 1/60.)
     pyglet.app.run()
