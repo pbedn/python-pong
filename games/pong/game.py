@@ -6,6 +6,23 @@ from pyglet.window import key
 from pyglet.gl import *
 
 
+def sound_setup():
+    global sound_beep, sound_peep, sound_plop
+
+    import sys
+    if sys.platform == "linux":
+        pyglet.options['audio'] = ('openal', 'pulse', 'silent')
+    else:
+        pyglet.options['audio'] = ('openal', 'directsound', 'silent')
+
+    pyglet.resource.path = ['res/sounds']
+    pyglet.resource.reindex()
+
+    sound_beep = pyglet.resource.media('ping_pong_8bit_beeep.ogg', streaming=False)
+    sound_peep = pyglet.resource.media('ping_pong_8bit_peeeeeep.ogg', streaming=False)
+    sound_plop = pyglet.resource.media('ping_pong_8bit_plop.ogg', streaming=False)
+
+
 # Setup Window
 window = pyglet.window.Window(width=800, height=600)
 window.set_caption('Pong')
@@ -163,6 +180,7 @@ def update(dt):
         ball_dir_y = t
 
         ball_speed += 0.5
+        if play_sounds: sound_plop.play()
 
     # check for collisions of ball with right paddle
     # TODO: sometimes ball fly through paddle (higher speed)
@@ -175,6 +193,7 @@ def update(dt):
         ball_dir_y = t
 
         ball_speed += 0.5
+        if play_sounds: sound_plop.play()
 
     # check for left wall collision
     if ball_pos_x < 0:
@@ -184,6 +203,7 @@ def update(dt):
         ball_pos_y = window.height / 2
         ball_dir_x = abs(ball_dir_x)  # force it to be positive
         ball_dir_y = 0
+        if play_sounds: sound_peep.play()
         init(new_game=False)
 
     # check for right wall collision
@@ -194,15 +214,18 @@ def update(dt):
         ball_pos_y = window.height / 2
         ball_dir_x = -abs(ball_dir_x)  # force it to be negative
         ball_dir_y = 0
+        if play_sounds: sound_peep.play()
         init(new_game=False)
 
     # check for top wall collision
     if ball_pos_y > window.height:
         ball_dir_y = -abs(ball_dir_y)  # force it to be negative
+        if play_sounds: sound_beep.play()
 
     # check for bottom wall collision
     if ball_pos_y < 0:
         ball_dir_y = abs(ball_dir_y)  # force it to be positive
+        if play_sounds: sound_beep.play()
 
     # normalize ball_dir_y
     # TODO: Research that in more detail
@@ -211,6 +234,8 @@ def update(dt):
 
 if __name__ == '__main__':
     computer_player = True
+    play_sounds = True
+    if play_sounds: sound_setup()
     init(new_game=True)
     pyglet.clock.schedule_interval(update, 1/60.)
     pyglet.app.run()
