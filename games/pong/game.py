@@ -17,15 +17,33 @@ WINDOW_HEIGHT_HALF = window.height // 2
 
 fps_display = pyglet.clock.ClockDisplay()
 
+main_batch = pyglet.graphics.Batch()
+
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
 
+score_left = pyglet.text.Label("0", font_name='Arial', font_size=window.width//11,
+                          x=window.width//2-window.width//10, y=window.height-window.height//10,
+                          anchor_x='center', anchor_y='center', batch=main_batch)
 
-def init():
+
+score_right = pyglet.text.Label("0", font_name='Arial', font_size=window.width//11,
+                          x=window.width//2+window.width//10, y=window.height-window.height//10,
+                          anchor_x='center', anchor_y='center', batch=main_batch)
+
+
+def init(new_game):
     global paddle_left_x, paddle_left_y, paddle_right_x, paddle_right_y
     global ball_pos_x, ball_pos_y, ball_dir_x, ball_dir_y
     global paddle_width, paddle_height, paddle_speed
     global ball_size, ball_speed
+    global score_player_left, score_player_right
+
+    if new_game:
+        score_player_left = 0
+        score_player_right = 0
+        score_left.text = str(score_player_left)
+        score_right.text = str(score_player_right)
 
     # paddles in general
     paddle_width = window.width // 57
@@ -86,6 +104,7 @@ def ai_player(ball_direction_x, ball_position_y, paddle_y):
 def on_draw():
     window.clear()
     fps_display.draw()
+    main_batch.draw()
 
     # Draw Paddles
     draw_rect(paddle_left_x, paddle_left_y, paddle_width, paddle_height)
@@ -111,6 +130,7 @@ def vec2_norm(x: int, y: float):
 
 
 def update(dt):
+    global score_player_left, score_player_right
     global ball_pos_x, ball_pos_y, ball_dir_x, ball_dir_y
     global paddle_left_x, paddle_left_y, paddle_right_x, paddle_right_y
     global paddle_speed, ball_speed, ball_size
@@ -145,6 +165,7 @@ def update(dt):
         ball_speed += 0.5
 
     # check for collisions of ball with right paddle
+    # TODO: sometimes ball fly through paddle (higher speed)
     if (paddle_right_x < ball_pos_x < paddle_right_x + paddle_width and
        paddle_right_y < ball_pos_y < paddle_right_y + paddle_height):
         # set fly direction depending on where it hit the paddle
@@ -157,19 +178,23 @@ def update(dt):
 
     # check for left wall collision
     if ball_pos_x < 0:
+        score_player_right += 1
+        score_right.text = str(score_player_right)
         ball_pos_x = window.width / 2
         ball_pos_y = window.height / 2
         ball_dir_x = abs(ball_dir_x)  # force it to be positive
         ball_dir_y = 0
-        init()
+        init(new_game=False)
 
     # check for right wall collision
     if ball_pos_x > window.width:
+        score_player_left += 1
+        score_left.text = str(score_player_left)
         ball_pos_x = window.width / 2
         ball_pos_y = window.height / 2
         ball_dir_x = -abs(ball_dir_x)  # force it to be negative
         ball_dir_y = 0
-        init()
+        init(new_game=False)
 
     # check for top wall collision
     if ball_pos_y > window.height:
@@ -186,6 +211,6 @@ def update(dt):
 
 if __name__ == '__main__':
     computer_player = True
-    init()
+    init(new_game=True)
     pyglet.clock.schedule_interval(update, 1/60.)
     pyglet.app.run()
