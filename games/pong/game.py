@@ -16,5 +16,10 @@ def on_draw():
     fps_display.draw()
 
 
+def update(dt):
+    pass
+
+
 if __name__ == '__main__':
+    pyglet.clock.schedule_interval(update, 1/60.)
     pyglet.app.run()
