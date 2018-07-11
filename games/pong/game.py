@@ -1,4 +1,5 @@
 import random
+from math import sqrt
 
 import pyglet
 from pyglet.window import key
@@ -82,6 +83,18 @@ def on_draw():
     draw_line(WINDOW_WIDTH_HALF, 0.0, WINDOW_WIDTH_HALF, window.height)
 
 
+def vec2_norm(x: int, y: float):
+    global ball_dir_x, ball_dir_y
+    # sets a vectors length to 1 (which means that x + y == 1)
+    length = sqrt((x * x) + (y * y))
+    if length != 1.0:
+        length = 1.0 / length
+        x *= length
+        y *= length
+    ball_dir_y = x
+    ball_dir_y = y
+
+
 def update(dt):
     global ball_pos_x, ball_pos_y, ball_dir_x, ball_dir_y
     global paddle_left_x, paddle_left_y, paddle_right_x, paddle_right_y
@@ -147,6 +160,10 @@ def update(dt):
     # check for bottom wall collision
     if ball_pos_y < 0:
         ball_dir_y = abs(ball_dir_y)  # force it to be positive
+
+    # normalize ball_dir_y
+    # TODO: Research that in more detail
+    vec2_norm(ball_dir_x, ball_dir_y)
 
 
 if __name__ == '__main__':
