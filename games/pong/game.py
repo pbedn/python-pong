@@ -1,3 +1,5 @@
+import random
+
 import pyglet
 from pyglet.gl import *
 
@@ -16,9 +18,9 @@ fps_display = pyglet.clock.ClockDisplay()
 
 def init():
     global paddle_left_x, paddle_left_y, paddle_right_x, paddle_right_y
-    global ball_pos_x, ball_pos_y
+    global ball_pos_x, ball_pos_y, ball_dir_x, ball_dir_y
     global paddle_width, paddle_height
-    global ball_size
+    global ball_size, ball_speed
 
     # paddles in general
     paddle_width = window.width // 57
@@ -34,7 +36,10 @@ def init():
 
     ball_pos_x = WINDOW_WIDTH_HALF
     ball_pos_y = WINDOW_HEIGHT_HALF
+    ball_dir_x = random.choice([-1, 1])
+    ball_dir_y = 0.0
     ball_size = 12
+    ball_speed = 8
 
 
 def draw_rect(x, y, width, height):
@@ -73,7 +78,36 @@ def on_draw():
 
 
 def update(dt):
-    pass
+    global ball_pos_x, ball_pos_y, ball_dir_x, ball_dir_y
+    global ball_speed
+
+    # fly a bit
+    ball_pos_x += ball_dir_x * ball_speed
+    ball_pos_y += ball_dir_y * ball_speed
+
+    # check for left wall collision
+    if ball_pos_x < 0:
+        ball_pos_x = window.width / 2
+        ball_pos_y = window.height / 2
+        ball_dir_x = ball_dir_x  # force it to be positive
+        ball_dir_y = 0
+        init()
+
+    # check for right wall collision
+    if ball_pos_x > window.width:
+        ball_pos_x = window.width / 2
+        ball_pos_y = window.height / 2
+        ball_dir_x = -ball_dir_x  # force it to be negative
+        ball_dir_y = 0
+        init()
+
+    # check for top wall collision
+    if ball_pos_y > window.height:
+        ball_dir_y = -ball_dir_y  # force it to be negative
+
+    # check for bottom wall collision
+    if ball_pos_y < 0:
+        ball_dir_y = abs(ball_dir_y) # force it to be positive
 
 
 if __name__ == '__main__':
