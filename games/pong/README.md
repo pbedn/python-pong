@@ -1,5 +1,8 @@
 ## PONG
 
+Files:
+* game.py - procedural version
+
 Design ideas for this game are from [Trevor Appleton procedural pong][trevor-appleton]
 and [noobtuts C++ pong][noobtuts-pong] tutorials.
 
@@ -16,11 +19,14 @@ Stage 9 - Finally we will look at methods to increase the speed for slower compu
 ```
 
 Features implemented:
-* [-] movement control
-* [-] collision detection
-* [-] scoring
-* [-] artificial intelligence
+* [DONE] movement control
+* [DONE] collision detection
+* [DONE] scoring
+* [DONE] artificial intelligence
+* [-] add sounds
 * [-] game menu
+* [-] resizing window
+* [-] refactor and add new OOP version
 
 Sounds are from [opengameart.org](https://opengameart.org/)
 
