@@ -32,7 +32,7 @@ Features implemented:
 * [DONE] artificial intelligence
 * [DONE] add sounds
 * [-] game menu
-* [-] resizing window
+* [DONE] resizing window
 * [-] add handicap for player or ai difficulty levels
 * [-] refactor and add new OOP version
 

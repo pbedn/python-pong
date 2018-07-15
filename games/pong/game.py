@@ -24,13 +24,15 @@ def sound_setup():
 
 
 # Setup Window
-window = pyglet.window.Window(width=800, height=600)
+WIDTH = 800
+HEIGHT = 600
+
+window = pyglet.window.Window(WIDTH, HEIGHT, resizable=True)
 window.set_caption('Pong')
 window.set_mouse_visible(False)
 
 WINDOW_WIDTH_HALF = window.width // 2
 WINDOW_HEIGHT_HALF = window.height // 2
-
 
 fps_display = pyglet.clock.ClockDisplay()
 
@@ -56,6 +58,8 @@ def init(new_game):
     global ball_size, ball_speed
     global score_player_left, score_player_right
 
+    scale_factor = (window.width + window.height) // 2
+
     if new_game:
         score_player_left = 0
         score_player_right = 0
@@ -65,7 +69,7 @@ def init(new_game):
     # paddles in general
     paddle_width = window.width // 57
     paddle_height = window.height // 8
-    paddle_speed = 9
+    paddle_speed = scale_factor // 80
 
     # left paddle position
     paddle_left_x = window.width // 10
@@ -79,8 +83,8 @@ def init(new_game):
     ball_pos_y = WINDOW_HEIGHT_HALF
     ball_dir_x = random.choice([-1, 1])
     ball_dir_y = 0.0
-    ball_size = 12
-    ball_speed = 8
+    ball_size = scale_factor // 57
+    ball_speed = scale_factor // 80
 
 
 def draw_rect(x, y, width, height):
@@ -131,7 +135,44 @@ def on_draw():
     draw_rect(ball_pos_x - ball_size / 2, ball_pos_y - ball_size / 2, ball_size, ball_size)
 
     # Draw Line
-    draw_line(WINDOW_WIDTH_HALF, 0.0, WINDOW_WIDTH_HALF, window.height)
+    draw_line(window.width // 2, 0.0, window.width // 2, window.height)
+
+
+@window.event
+def on_resize(width, height):
+    global paddle_left_x, paddle_left_y, paddle_right_x, paddle_right_y
+    global paddle_width, paddle_height, paddle_speed
+    global ball_size, ball_speed
+    global score_player_left, score_player_right
+
+    scale_factor = (width + height) // 2
+
+    # paddles in general
+    paddle_width = width // 60
+    paddle_height = height // 7
+    paddle_speed = scale_factor // 80
+
+    # left paddle position
+    paddle_left_x = width // 10
+    paddle_left_y = WINDOW_HEIGHT_HALF - paddle_height // 2
+
+    # right paddle position
+    paddle_right_x = width - paddle_width - width // 10
+    paddle_right_y = WINDOW_HEIGHT_HALF - paddle_height // 2
+
+    ball_size = scale_factor // 57
+    ball_speed = scale_factor // 80
+
+    # Score Resize
+    score_left.font_size = width // 13
+    score_left.x = width // 2 - width // 10
+    score_left.y = height - height // 10
+    score_right.font_size = width // 13
+    score_right.x = width // 2 + width // 10
+    score_right.y = height - height // 10
+
+    # Line Resize
+    draw_line(width // 2, 0.0, width // 2, height // 2)
 
 
 def vec2_norm(x: int, y: float):
