@@ -6,23 +6,6 @@ from pyglet.window import key
 from pyglet.gl import *
 
 
-def sound_setup():
-    global sound_beep, sound_peep, sound_plop
-
-    import sys
-    if sys.platform == "linux":
-        pyglet.options['audio'] = ('openal', 'pulse', 'silent')
-    else:
-        pyglet.options['audio'] = ('openal', 'directsound', 'silent')
-
-    pyglet.resource.path = ['res/sounds']
-    pyglet.resource.reindex()
-
-    sound_beep = pyglet.resource.media('ping_pong_8bit_beeep.ogg', streaming=False)
-    sound_peep = pyglet.resource.media('ping_pong_8bit_peeeeeep.ogg', streaming=False)
-    sound_plop = pyglet.resource.media('ping_pong_8bit_plop.ogg', streaming=False)
-
-
 # Setup Window
 WIDTH = 800
 HEIGHT = 600
@@ -62,6 +45,23 @@ difficulty = pyglet.text.Label("Difficulty", font_name='Arial', font_size=(windo
 exit_game = pyglet.text.Label("Exit Game", font_name='Arial', font_size=(window.width+window.height)//26,
                           x=window.width//2, y=window.height-6*window.height//10,
                           anchor_x='center', anchor_y='center')
+
+
+def sound_setup():
+    global sound_beep, sound_peep, sound_plop
+
+    import sys
+    if sys.platform == "linux":
+        pyglet.options['audio'] = ('openal', 'pulse', 'silent')
+    else:
+        pyglet.options['audio'] = ('openal', 'directsound', 'silent')
+
+    pyglet.resource.path = ['res/sounds']
+    pyglet.resource.reindex()
+
+    sound_beep = pyglet.resource.media('ping_pong_8bit_beeep.ogg', streaming=False)
+    sound_peep = pyglet.resource.media('ping_pong_8bit_peeeeeep.ogg', streaming=False)
+    sound_plop = pyglet.resource.media('ping_pong_8bit_plop.ogg', streaming=False)
 
 
 def init(new_game):
