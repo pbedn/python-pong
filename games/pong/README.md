@@ -33,7 +33,7 @@ Features implemented:
 * [DONE] add sounds
 * [DONE] game menu
 * [DONE] resizing window
-* [-] add handicap for player or ai difficulty levels
+* [DONE] add handicap for player or ai difficulty levels
 * [-] refactor and add new OOP version
 
 ---

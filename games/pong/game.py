@@ -41,9 +41,11 @@ start_game = pyglet.text.Label("Start Game", font_name='Arial', font_size=(windo
 # font_size of start_game is set in resize function
 start_game.bold = True
 
-difficulty = pyglet.text.Label("Difficulty", font_name='Arial', font_size=(window.width+window.height)//26,
+difficulty = pyglet.text.Label("Difficulty: ", font_name='Arial', font_size=(window.width+window.height)//26,
                           x=window.width//2, y=window.height-4*window.height//10,
                           anchor_x='center', anchor_y='center')
+game_difficulty = 'normal'
+difficulty.text += game_difficulty
 
 exit_game = pyglet.text.Label("Exit Game", font_name='Arial', font_size=(window.width+window.height)//26,
                           x=window.width//2, y=window.height-6*window.height//10,
@@ -126,7 +128,10 @@ def draw_line(x1, y1, x2, y2, width=2):
 
 
 def ai_player(ball_direction_x, ball_position_y, paddle_y):
-    # center the paddle when ball is moving away
+
+    if game_difficulty == 'normal' and random.random() > 0.5:
+        return paddle_y
+
     if ball_direction_x == 1:
         if (paddle_y + paddle_height / 2) < WINDOW_HEIGHT_HALF - paddle_height / 2:
             paddle_y += paddle_speed
@@ -172,6 +177,7 @@ def on_draw():
 
 def choose_menu_item(symbol, modifier):
     global game_menu, current_index, current_selection
+    global game_difficulty
 
     if symbol == key.DOWN:
         current_selection.bold = False
@@ -191,6 +197,12 @@ def choose_menu_item(symbol, modifier):
         current_selection = menu_items[current_index]
         current_selection.bold = True
         current_selection.font_size += 10
+    elif current_index == 1 and symbol == key.RIGHT:
+        game_difficulty = 'harder'
+        current_selection.text = 'Difficulty: ' + game_difficulty
+    elif current_index == 1 and symbol == key.LEFT:
+        game_difficulty = 'normal'
+        current_selection.text = 'Difficulty: ' + game_difficulty
     elif symbol == key.ENTER:
         if current_index == 0:
             game_menu = False
@@ -204,6 +216,8 @@ def choose_menu_item(symbol, modifier):
 def on_key_press(symbol, modifier):
     if game_menu:
         choose_menu_item(symbol, modifier)
+    else:
+        window.push_handlers(keys)
 
 
 @window.event
