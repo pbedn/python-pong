@@ -51,6 +51,19 @@ score_right = pyglet.text.Label("0", font_name='Arial', font_size=window.width//
                           anchor_x='center', anchor_y='center', batch=main_batch)
 
 
+start_game = pyglet.text.Label("Start Game", font_name='Arial', font_size=(window.width+window.height)//26,
+                          x=window.width//2, y=window.height-2*window.height//10,
+                          anchor_x='center', anchor_y='center')
+
+difficulty = pyglet.text.Label("Difficulty", font_name='Arial', font_size=(window.width+window.height)//26,
+                          x=window.width//2, y=window.height-4*window.height//10,
+                          anchor_x='center', anchor_y='center')
+
+exit_game = pyglet.text.Label("Exit Game", font_name='Arial', font_size=(window.width+window.height)//26,
+                          x=window.width//2, y=window.height-6*window.height//10,
+                          anchor_x='center', anchor_y='center')
+
+
 def init(new_game):
     global paddle_left_x, paddle_left_y, paddle_right_x, paddle_right_y
     global ball_pos_x, ball_pos_y, ball_dir_x, ball_dir_y
@@ -121,9 +134,13 @@ def ai_player(ball_direction_x, ball_position_y, paddle_y):
     return paddle_y
 
 
-@window.event
-def on_draw():
-    window.clear()
+def draw_menu():
+    start_game.draw()
+    difficulty.draw()
+    exit_game.draw()
+
+
+def draw_game_objects():
     fps_display.draw()
     main_batch.draw()
 
@@ -136,6 +153,15 @@ def on_draw():
 
     # Draw Line
     draw_line(window.width // 2, 0.0, window.width // 2, window.height)
+
+
+@window.event
+def on_draw():
+    window.clear()
+    if game_menu:
+        draw_menu()
+    else:
+        draw_game_objects()
 
 
 @window.event
@@ -174,6 +200,17 @@ def on_resize(width, height):
     # Line Resize
     draw_line(width // 2, 0.0, width // 2, height // 2)
 
+    # Game Menu
+    start_game.font_size = (width+height) // 23
+    start_game.x = width // 2
+    start_game.y = height - 2 * height // 10
+    difficulty.font_size = (width+height) // 23
+    difficulty.x = width // 2
+    difficulty.y = height - 4 * height // 10
+    exit_game.font_size = (width+height) // 23
+    exit_game.x = width // 2
+    exit_game.y = height - 6 * height // 10
+
 
 def vec2_norm(x: int, y: float):
     global ball_dir_x, ball_dir_y
@@ -187,7 +224,7 @@ def vec2_norm(x: int, y: float):
     ball_dir_y = y
 
 
-def update(dt):
+def update_game(dt):
     global score_player_left, score_player_right
     global ball_pos_x, ball_pos_y, ball_dir_x, ball_dir_y
     global paddle_left_x, paddle_left_y, paddle_right_x, paddle_right_y
@@ -273,7 +310,15 @@ def update(dt):
     vec2_norm(ball_dir_x, ball_dir_y)
 
 
+def update(dt):
+    if game_menu:
+        pass
+    else:
+        update_game(dt)
+
+
 if __name__ == '__main__':
+    game_menu = True
     computer_player = True
     play_sounds = True
     if play_sounds: sound_setup()
