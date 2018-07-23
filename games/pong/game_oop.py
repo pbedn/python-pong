@@ -51,6 +51,21 @@ class Paddle(Drawing):
     def draw(self):
         self.draw_rect(self.x, self.y, self.width, self.height)
 
+    def check_collisions(self, ball):
+        # check for collisions of ball with paddle
+
+        if (self.x < ball.x < self.x + self.width and
+                self.y < ball.y < self.y + self.height):
+            # set fly direction depending on where it hit the paddle
+            # (t is 0.5 if hit at top, 0 at center, -0.5 at bottom)
+            t = ((ball.y - self.y) / self.height) - 0.5
+            if self.side == 'left':
+                ball.ball_dir_x = abs(ball.ball_dir_x)  # force it to be positive
+            elif self.side == 'right':
+                ball.ball_dir_x = -abs(ball.ball_dir_x)  # force it to be negative
+            ball.ball_dir_y = t
+            ball.ball_speed += 0.5
+
     def update(self, ball):
         if self.side == 'left':
             if self.keys[key.W]:
@@ -62,6 +77,8 @@ class Paddle(Drawing):
                 self.y += self.speed
             if self.keys[key.DOWN]:
                 self.y -= self.speed
+
+        self.check_collisions(ball)
 
 
 class Ball(Drawing):
