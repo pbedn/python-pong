@@ -67,6 +67,34 @@ class Ball(Drawing):
                        self.ball_size,
                        self.ball_size)
 
+    def check_collisions(self):
+        # check for left wall collision
+        if self.x < 0:
+            self.x = self.window_width / 2
+            self.y = self.window_height / 2
+            self.ball_dir_x = abs(self.ball_dir_x)  # force it to be positive
+            self.ball_dir_y = 0
+
+        # check for right wall collision
+        if self.x > self.window_width:
+            self.x = self.window_width / 2
+            self.y = self.window_height / 2
+            self.ball_dir_x = -abs(self.ball_dir_x)  # force it to be negative
+            self.ball_dir_y = 0
+
+        # check for top wall collision
+        if self.y > self.window_height:
+            self.ball_dir_y = -abs(self.ball_dir_y)  # force it to be negative
+
+        # check for bottom wall collision
+        if self.y < 0:
+            self.ball_dir_y = abs(self.ball_dir_y)  # force it to be positive
+
+    def update(self):
+        self.x += self.ball_dir_x * self.ball_speed
+        self.y += self.ball_dir_y * self.ball_speed
+        self.check_collisions()
+
 
 class Line(Drawing):
     def __init__(self, *args):
@@ -108,7 +136,7 @@ class Game(pyglet.window.Window):
         self.line.draw()
 
     def update(self, dt):
-        pass
+        self.ball.update()
 
 
 if __name__ == '__main__':
