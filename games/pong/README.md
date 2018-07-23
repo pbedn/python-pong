@@ -5,7 +5,10 @@ Files:
 
 ---
 
-Initial design ideas for this game are from [Trevor Appleton procedural pong][trevor-appleton]:
+Initial design ideas for this game are from [Trevor Appleton procedural pong][trevor-appleton]
+and [noobtuts C++ pong][noobtuts-pong] tutorial.
+
+Game design stages:
 
 ```text
 Stage 1 - Create a blank window
@@ -21,20 +24,22 @@ Stage 10 - Add game menu
 Stage 11 - Make game easier by adding a difficulty levels 
 ```
 
-and code ideas from [noobtuts C++ pong][noobtuts-pong] tutorial.
+![menu](docs/menu.png)
+
+![game](docs/game.png)
 
 ---
 
 Features implemented:
-* [DONE] movement control
-* [DONE] collision detection
-* [DONE] scoring
-* [DONE] artificial intelligence
-* [DONE] add sounds
-* [DONE] game menu
-* [DONE] resizing window
-* [DONE] add handicap for player or ai difficulty levels
-* [-] refactor and add new OOP version
+- [x] movement control
+- [x] collision detection
+- [x] scoring
+- [x] artificial intelligence
+- [x] add sounds
+- [x] game menu
+- [x] resizing window
+- [x] add handicap for player or ai difficulty levels
+- [ ] refactor and add new OOP version
 
 ---
 
