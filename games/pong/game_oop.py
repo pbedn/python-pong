@@ -1,15 +1,16 @@
 import random
 
 import pyglet
-from pyglet.window import FPSDisplay
+from pyglet.window import FPSDisplay, key
 from pyglet.gl import glBegin, glVertex2f, glEnd, GL_QUADS
 from pyglet.gl import glLineStipple, glEnable, glLineWidth, GL_LINE_STIPPLE, GL_LINES
 
 
 class Drawing:
-    def __init__(self, width, height):
+    def __init__(self, width, height, keys):
         self.window_width = width
         self.window_height = height
+        self.keys = keys
         self.scale_factor = (self.window_width + self.window_height) // 2
 
     @staticmethod
@@ -49,6 +50,18 @@ class Paddle(Drawing):
 
     def draw(self):
         self.draw_rect(self.x, self.y, self.width, self.height)
+
+    def update(self, ball):
+        if self.side == 'left':
+            if self.keys[key.W]:
+                self.y += self.speed
+            if self.keys[key.S]:
+                self.y -= self.speed
+        elif self.side == 'right':
+            if self.keys[key.UP]:
+                self.y += self.speed
+            if self.keys[key.DOWN]:
+                self.y -= self.speed
 
 
 class Ball(Drawing):
@@ -122,10 +135,13 @@ class Game(pyglet.window.Window):
 
         self.fps_display = FPSDisplay(self)
 
-        self.paddle_left = Paddle('left', self.width, self.height)
-        self.paddle_right = Paddle('right', self.width, self.height)
-        self.ball = Ball(self.width, self.height)
-        self.line = Line(self.width, self.height)
+        self.keys = key.KeyStateHandler()
+        self.push_handlers(self.keys)
+
+        self.paddle_left = Paddle('left', self.width, self.height, self.keys)
+        self.paddle_right = Paddle('right', self.width, self.height, self.keys)
+        self.ball = Ball(self.width, self.height, self.keys)
+        self.line = Line(self.width, self.height, self.keys)
 
     def on_draw(self):
         self.clear()
@@ -137,6 +153,8 @@ class Game(pyglet.window.Window):
 
     def update(self, dt):
         self.ball.update()
+        self.paddle_left.update(self.ball)
+        self.paddle_right.update(self.ball)
 
 
 if __name__ == '__main__':
