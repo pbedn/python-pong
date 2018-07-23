@@ -38,6 +38,9 @@ start_game = pyglet.text.Label("Start Game", font_name='Arial', font_size=(windo
                           x=window.width//2, y=window.height-2*window.height//10,
                           anchor_x='center', anchor_y='center')
 
+# font_size of start_game is set in resize function
+start_game.bold = True
+
 difficulty = pyglet.text.Label("Difficulty", font_name='Arial', font_size=(window.width+window.height)//26,
                           x=window.width//2, y=window.height-4*window.height//10,
                           anchor_x='center', anchor_y='center')
@@ -45,6 +48,9 @@ difficulty = pyglet.text.Label("Difficulty", font_name='Arial', font_size=(windo
 exit_game = pyglet.text.Label("Exit Game", font_name='Arial', font_size=(window.width+window.height)//26,
                           x=window.width//2, y=window.height-6*window.height//10,
                           anchor_x='center', anchor_y='center')
+
+menu_items = [start_game, difficulty, exit_game]
+current_selection = menu_items[0]
 
 
 def sound_setup():
@@ -164,12 +170,49 @@ def on_draw():
         draw_game_objects()
 
 
+def choose_menu_item(symbol, modifier):
+    global game_menu, current_index, current_selection
+
+    if symbol == key.DOWN:
+        current_selection.bold = False
+        current_selection.font_size -= 10
+        current_index += 1
+        if current_index > 2:
+            current_index = 0
+        current_selection = menu_items[current_index]
+        current_selection.bold = True
+        current_selection.font_size += 10
+    elif symbol == key.UP:
+        current_selection.bold = False
+        current_selection.font_size -= 10
+        current_index -= 1
+        if current_index < 0:
+            current_index = 2
+        current_selection = menu_items[current_index]
+        current_selection.bold = True
+        current_selection.font_size += 10
+    elif symbol == key.ENTER:
+        if current_index == 0:
+            game_menu = False
+        elif current_index == 1:
+            pass
+        elif current_index == 2:
+            pyglet.app.exit()
+
+
+@window.event
+def on_key_press(symbol, modifier):
+    if game_menu:
+        choose_menu_item(symbol, modifier)
+
+
 @window.event
 def on_resize(width, height):
     global paddle_left_x, paddle_left_y, paddle_right_x, paddle_right_y
     global paddle_width, paddle_height, paddle_speed
     global ball_size, ball_speed
     global score_player_left, score_player_right
+    global start_game, difficulty, exit_game
 
     scale_factor = (width + height) // 2
 
@@ -202,6 +245,8 @@ def on_resize(width, height):
 
     # Game Menu
     start_game.font_size = (width+height) // 23
+    if game_menu:
+        start_game.font_size += 10
     start_game.x = width // 2
     start_game.y = height - 2 * height // 10
     difficulty.font_size = (width+height) // 23
@@ -319,6 +364,7 @@ def update(dt):
 
 if __name__ == '__main__':
     game_menu = True
+    current_index = 0
     computer_player = True
     play_sounds = True
     if play_sounds: sound_setup()
