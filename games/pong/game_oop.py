@@ -85,19 +85,22 @@ class Paddle(Drawing):
             ball.ball_speed += 0.5
             if self.sound: self.sound.plop.play()
 
-    def ai_player(self, ball):
-        if ball.ball_dir_x == 1:
-            if (self.y + self.height / 2) < self.window_height // 2 - self.height / 2:
-                self.y += self.speed
-            elif (self.y + self.height / 2) > self.window_height // 2 + self.height / 2:
-                self.y -= self.speed
-        elif ball.ball_dir_x == -1:
-            if (self.y + self.height / 2) < ball.y - self.height / 2:
-                self.y += self.speed
-            elif (self.y + self.height / 2) > ball.y + self.height / 2:
-                self.y -= self.speed
+    def ai_player(self, ball, game_difficulty):
+        if game_difficulty == 'normal' and random.random() > 0.5:
+            pass
+        else:
+            if ball.ball_dir_x == 1:
+                if (self.y + self.height / 2) < self.window_height // 2 - self.height / 2:
+                    self.y += self.speed
+                elif (self.y + self.height / 2) > self.window_height // 2 + self.height / 2:
+                    self.y -= self.speed
+            elif ball.ball_dir_x == -1:
+                if (self.y + self.height / 2) < ball.y - self.height / 2:
+                    self.y += self.speed
+                elif (self.y + self.height / 2) > ball.y + self.height / 2:
+                    self.y -= self.speed
 
-    def update(self, ball):
+    def update(self, ball, game_difficulty=None):
         if self.side == 'left':
             if not self.computer_player:
                 if self.keys[key.W]:
@@ -105,7 +108,7 @@ class Paddle(Drawing):
                 if self.keys[key.S]:
                     self.y -= self.speed
             else:
-                self.ai_player(ball)
+                self.ai_player(ball, game_difficulty)
 
         if self.side == 'right':
             if self.keys[key.UP]:
@@ -260,6 +263,9 @@ class Game(pyglet.window.Window):
         self.ball.update(self.scores)
         self.paddle_left.update(self.ball)
         self.paddle_right.update(self.ball)
+            self.ball.update(self.scores)
+            self.paddle_left.update(self.ball, self.game_difficulty)
+            self.paddle_right.update(self.ball)
 
 
 if __name__ == '__main__':
