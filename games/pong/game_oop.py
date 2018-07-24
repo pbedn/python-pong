@@ -217,6 +217,25 @@ class Score():
         self.label.draw()
 
 
+class MenuItem():
+    def __init__(self, window_width, window_height, text, modifier, *args):
+        super().__init__(*args)
+        self.label = pyglet.text.Label()
+        self.label.font_name = 'Arial'
+        self.label.anchor_x = 'center'
+        self.label.anchor_y = 'center'
+        self.label.text = text
+        self.label.font_size = (window_width + window_height) // 26
+        self.label.x = window_width // 2
+        self.label.y = window_height - modifier * window_height // 10
+
+    def reset(self):
+        self.label.text = '0'
+
+    def draw(self):
+        self.label.draw()
+
+
 class Game(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -225,11 +244,8 @@ class Game(pyglet.window.Window):
         self.set_caption('Pong')
         self.set_mouse_visible(False)
         self.frame_rate = 1/60.
-
         self.fps_display = FPSDisplay(self)
-
         self.keys = key.KeyStateHandler()
-        self.push_handlers(self.keys)
 
         main_batch = pyglet.graphics.Batch()
 
@@ -249,8 +265,23 @@ class Game(pyglet.window.Window):
         score = {'left': 0, 'right': 0}
         self.scores = [score, self.score_left, self.score_right]
 
-    def on_draw(self):
-        self.clear()
+        self.game_menu = True
+        self.start_game = MenuItem(self.width, self.height, "Start Game", modifier=2)
+        self.start_game.bold = True
+        self.difficulty = MenuItem(self.width, self.height, "Difficulty: ", modifier=4)
+        self.game_difficulty = 'normal'
+        self.difficulty.label.text += self.game_difficulty
+        self.exit_game = MenuItem(self.width, self.height, "Exit Game", modifier=6)
+        self.menu_items = [self.start_game, self.difficulty, self.exit_game]
+        self.current_index = 0
+        self.current_selection = self.menu_items[0].label
+
+    def draw_menu(self):
+        self.start_game.draw()
+        self.difficulty.draw()
+        self.exit_game.draw()
+
+    def draw_game_objects(self):
         self.fps_display.draw()
         self.paddle_left.draw()
         self.paddle_right.draw()
@@ -259,10 +290,58 @@ class Game(pyglet.window.Window):
         self.score_left.draw()
         self.score_right.draw()
 
+    def on_draw(self):
+        self.clear()
+        if self.game_menu:
+            self.draw_menu()
+        else:
+            self.draw_game_objects()
+
+    def choose_menu_item(self, symbol, modifier):
+        if symbol == key.DOWN:
+            self.current_selection.bold = False
+            self.current_selection.font_size -= 10
+            self.current_index += 1
+            if self.current_index > 2:
+                self.current_index = 0
+            self.current_selection = self.menu_items[self.current_index].label
+            self.current_selection.bold = True
+            self.current_selection.font_size += 10
+        elif symbol == key.UP:
+            self.current_selection.bold = False
+            self.current_selection.font_size -= 10
+            self.current_index -= 1
+            if self.current_index < 0:
+                self.current_index = 2
+            self.current_selection = self.menu_items[self.current_index].label
+            self.current_selection.bold = True
+            self.current_selection.font_size += 10
+        elif self.current_index == 1 and symbol == key.RIGHT:
+            self.game_difficulty = 'harder'
+            self.current_selection.text = 'Difficulty: ' + self.game_difficulty
+        elif self.current_index == 1 and symbol == key.LEFT:
+            self.game_difficulty = 'normal'
+            self.current_selection.text = 'Difficulty: ' + self.game_difficulty
+        elif symbol == key.ENTER:
+            if self.current_index == 0:
+                self.game_menu = False
+            elif self.current_index == 1:
+                pass
+            elif self.current_index == 2:
+                pyglet.app.exit()
+
+    def on_key_press(self, symbol, modifier):
+        if self.game_menu:
+            self.choose_menu_item(symbol, modifier)
+        else:
+            if self.keys[key.ESCAPE]:
+                pyglet.app.exit()
+            self.push_handlers(self.keys)
+
     def update(self, dt):
-        self.ball.update(self.scores)
-        self.paddle_left.update(self.ball)
-        self.paddle_right.update(self.ball)
+        if self.game_menu:
+            pass
+        else:
             self.ball.update(self.scores)
             self.paddle_left.update(self.ball, self.game_difficulty)
             self.paddle_right.update(self.ball)
