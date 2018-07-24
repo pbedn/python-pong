@@ -7,7 +7,7 @@ from pyglet.gl import glLineStipple, glEnable, glLineWidth, GL_LINE_STIPPLE, GL_
 
 
 class Drawing:
-    def __init__(self, width, height, keys, ai=False):
+    def __init__(self, width, height, keys=None, ai=False):
         self.window_width = width
         self.window_height = height
         self.keys = keys
@@ -117,13 +117,15 @@ class Ball(Drawing):
                        self.ball_size,
                        self.ball_size)
 
-    def check_collisions(self):
+    def check_collisions(self, scores):
         # check for left wall collision
         if self.x < 0:
             self.x = self.window_width / 2
             self.y = self.window_height / 2
             self.ball_dir_x = abs(self.ball_dir_x)  # force it to be positive
             self.ball_dir_y = 0
+            scores[0]['right'] += 1
+            scores[2].label.text = str(scores[0]['right'])
             self.reset()
 
         # check for right wall collision
@@ -132,6 +134,8 @@ class Ball(Drawing):
             self.y = self.window_height / 2
             self.ball_dir_x = -abs(self.ball_dir_x)  # force it to be negative
             self.ball_dir_y = 0
+            scores[0]['left'] += 1
+            scores[1].label.text = str(scores[0]['left'])
             self.reset()
 
         # check for top wall collision
@@ -142,10 +146,10 @@ class Ball(Drawing):
         if self.y < 0:
             self.ball_dir_y = abs(self.ball_dir_y)  # force it to be positive
 
-    def update(self):
+    def update(self, scores):
         self.x += self.ball_dir_x * self.ball_speed
         self.y += self.ball_dir_y * self.ball_speed
-        self.check_collisions()
+        self.check_collisions(scores)
 
 
 class Line(Drawing):
@@ -163,6 +167,30 @@ class Line(Drawing):
                        self.line_width)
 
 
+class Score():
+    def __init__(self, side, window_width, window_height, text, batch, *args):
+        super().__init__(*args)
+        self.label = pyglet.text.Label()
+        self.label.font_name = 'Arial'
+        self.label.anchor_x = 'center'
+        self.label.anchor_y = 'center'
+        self.label.batch = batch
+        self.label.text = text
+        self.label.font_size = window_width//11
+        if side == 'left':
+            self.label.x = window_width // 2 - window_width // 10
+            self.label.y = window_height - window_height // 10
+        elif side == 'right':
+            self.label.x = window_width // 2 + window_width // 10
+            self.label.y = window_height - window_height // 10
+
+    def reset(self):
+        self.label.text = '0'
+
+    def draw(self):
+        self.label.draw()
+
+
 class Game(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -177,12 +205,19 @@ class Game(pyglet.window.Window):
         self.keys = key.KeyStateHandler()
         self.push_handlers(self.keys)
 
+        main_batch = pyglet.graphics.Batch()
+
         self.ai = True
 
         self.paddle_left = Paddle('left', self.width, self.height, self.keys, self.ai)
         self.paddle_right = Paddle('right', self.width, self.height, self.keys)
         self.ball = Ball(self.width, self.height, self.keys)
         self.line = Line(self.width, self.height, self.keys)
+
+        self.score_left = Score('left', self.width, self.height, '0', batch=main_batch)
+        self.score_right = Score('right', self.width, self.height, '0', batch=main_batch)
+        score = {'left': 0, 'right': 0}
+        self.scores = [score, self.score_left, self.score_right]
 
     def on_draw(self):
         self.clear()
@@ -191,9 +226,11 @@ class Game(pyglet.window.Window):
         self.paddle_right.draw()
         self.ball.draw()
         self.line.draw()
+        self.score_left.draw()
+        self.score_right.draw()
 
     def update(self, dt):
-        self.ball.update()
+        self.ball.update(self.scores)
         self.paddle_left.update(self.ball)
         self.paddle_right.update(self.ball)
 
