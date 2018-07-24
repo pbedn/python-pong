@@ -6,6 +6,22 @@ from pyglet.gl import glBegin, glVertex2f, glEnd, GL_QUADS
 from pyglet.gl import glLineStipple, glEnable, glLineWidth, GL_LINE_STIPPLE, GL_LINES
 
 
+class Sounds:
+    def __init__(self):
+        import sys
+        if sys.platform == "linux":
+            pyglet.options['audio'] = ('openal', 'pulse', 'silent')
+        else:
+            pyglet.options['audio'] = ('openal', 'directsound', 'silent')
+
+        pyglet.resource.path = ['res/sounds']
+        pyglet.resource.reindex()
+
+        self.beep = pyglet.resource.media('ping_pong_8bit_beeep.ogg', streaming=False)
+        self.peep = pyglet.resource.media('ping_pong_8bit_peeeeeep.ogg', streaming=False)
+        self.plop = pyglet.resource.media('ping_pong_8bit_plop.ogg', streaming=False)
+
+
 class Drawing:
     def __init__(self, width, height, keys=None, ai=False):
         self.window_width = width
@@ -35,12 +51,13 @@ class Drawing:
 
 
 class Paddle(Drawing):
-    def __init__(self, side, *args):
+    def __init__(self, side, sounds, *args):
         super().__init__(*args)
         self.side = side
         self.width = self.window_width // 57
         self.height = self.window_height // 8
         self.speed = self.scale_factor // 80
+        self.sound = sounds
 
         if self.side == 'left':
             self.x = self.window_width // 10
@@ -66,6 +83,7 @@ class Paddle(Drawing):
                 ball.ball_dir_x = -abs(ball.ball_dir_x)  # force it to be negative
             ball.ball_dir_y = t
             ball.ball_speed += 0.5
+            if self.sound: self.sound.plop.play()
 
     def ai_player(self, ball):
         if ball.ball_dir_x == 1:
@@ -99,9 +117,10 @@ class Paddle(Drawing):
 
 
 class Ball(Drawing):
-    def __init__(self, *args):
+    def __init__(self, sounds=None, *args):
         super().__init__(*args)
         self.reset()
+        self.sound = sounds
 
     def reset(self):
         self.x = self.window_width // 2
@@ -126,6 +145,7 @@ class Ball(Drawing):
             self.ball_dir_y = 0
             scores[0]['right'] += 1
             scores[2].label.text = str(scores[0]['right'])
+            if self.sound: self.sound.peep.play()
             self.reset()
 
         # check for right wall collision
@@ -136,15 +156,18 @@ class Ball(Drawing):
             self.ball_dir_y = 0
             scores[0]['left'] += 1
             scores[1].label.text = str(scores[0]['left'])
+            if self.sound: self.sound.peep.play()
             self.reset()
 
         # check for top wall collision
         if self.y > self.window_height:
             self.ball_dir_y = -abs(self.ball_dir_y)  # force it to be negative
+            if self.sound: self.sound.beep.play()
 
         # check for bottom wall collision
         if self.y < 0:
             self.ball_dir_y = abs(self.ball_dir_y)  # force it to be positive
+            if self.sound: self.sound.beep.play()
 
     def update(self, scores):
         self.x += self.ball_dir_x * self.ball_speed
@@ -209,9 +232,13 @@ class Game(pyglet.window.Window):
 
         self.ai = True
 
-        self.paddle_left = Paddle('left', self.width, self.height, self.keys, self.ai)
-        self.paddle_right = Paddle('right', self.width, self.height, self.keys)
-        self.ball = Ball(self.width, self.height, self.keys)
+        self.play_sounds = True
+        if self.play_sounds:
+            self.sounds = Sounds()
+
+        self.paddle_left = Paddle('left', self.sounds, self.width, self.height, self.keys, self.ai)
+        self.paddle_right = Paddle('right', self.sounds, self.width, self.height, self.keys)
+        self.ball = Ball(self.sounds, self.width, self.height, self.keys)
         self.line = Line(self.width, self.height, self.keys)
 
         self.score_left = Score('left', self.width, self.height, '0', batch=main_batch)
