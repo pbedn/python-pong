@@ -101,6 +101,9 @@ class Paddle(Drawing):
 class Ball(Drawing):
     def __init__(self, *args):
         super().__init__(*args)
+        self.reset()
+
+    def reset(self):
         self.x = self.window_width // 2
         self.y = self.window_height // 2
         self.ball_dir_x = random.choice([-1, 1])
@@ -121,6 +124,7 @@ class Ball(Drawing):
             self.y = self.window_height / 2
             self.ball_dir_x = abs(self.ball_dir_x)  # force it to be positive
             self.ball_dir_y = 0
+            self.reset()
 
         # check for right wall collision
         if self.x > self.window_width:
@@ -128,6 +132,7 @@ class Ball(Drawing):
             self.y = self.window_height / 2
             self.ball_dir_x = -abs(self.ball_dir_x)  # force it to be negative
             self.ball_dir_y = 0
+            self.reset()
 
         # check for top wall collision
         if self.y > self.window_height:
