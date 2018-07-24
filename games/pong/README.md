@@ -2,6 +2,7 @@
 
 Files:
 * game.py - procedural version
+* game_oop.py - object oriented version
 
 ---
 
@@ -37,9 +38,10 @@ Features implemented:
 - [x] artificial intelligence
 - [x] add sounds
 - [x] game menu
-- [x] resizing window
+- [x] resizing window (only in procedural version)
 - [x] add handicap for player or ai difficulty levels
-- [ ] refactor and add new OOP version
+- [x] add new OOP version
+- [ ] refactor 
 
 ---
 
