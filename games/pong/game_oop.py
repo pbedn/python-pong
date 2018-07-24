@@ -7,11 +7,12 @@ from pyglet.gl import glLineStipple, glEnable, glLineWidth, GL_LINE_STIPPLE, GL_
 
 
 class Drawing:
-    def __init__(self, width, height, keys):
+    def __init__(self, width, height, keys, ai=False):
         self.window_width = width
         self.window_height = height
         self.keys = keys
         self.scale_factor = (self.window_width + self.window_height) // 2
+        self.computer_player = ai
 
     @staticmethod
     def draw_rect(x, y, width, height):
@@ -66,13 +67,29 @@ class Paddle(Drawing):
             ball.ball_dir_y = t
             ball.ball_speed += 0.5
 
+    def ai_player(self, ball):
+        if ball.ball_dir_x == 1:
+            if (self.y + self.height / 2) < self.window_height // 2 - self.height / 2:
+                self.y += self.speed
+            elif (self.y + self.height / 2) > self.window_height // 2 + self.height / 2:
+                self.y -= self.speed
+        elif ball.ball_dir_x == -1:
+            if (self.y + self.height / 2) < ball.y - self.height / 2:
+                self.y += self.speed
+            elif (self.y + self.height / 2) > ball.y + self.height / 2:
+                self.y -= self.speed
+
     def update(self, ball):
         if self.side == 'left':
-            if self.keys[key.W]:
-                self.y += self.speed
-            if self.keys[key.S]:
-                self.y -= self.speed
-        elif self.side == 'right':
+            if not self.computer_player:
+                if self.keys[key.W]:
+                    self.y += self.speed
+                if self.keys[key.S]:
+                    self.y -= self.speed
+            else:
+                self.ai_player(ball)
+
+        if self.side == 'right':
             if self.keys[key.UP]:
                 self.y += self.speed
             if self.keys[key.DOWN]:
@@ -155,7 +172,9 @@ class Game(pyglet.window.Window):
         self.keys = key.KeyStateHandler()
         self.push_handlers(self.keys)
 
-        self.paddle_left = Paddle('left', self.width, self.height, self.keys)
+        self.ai = True
+
+        self.paddle_left = Paddle('left', self.width, self.height, self.keys, self.ai)
         self.paddle_right = Paddle('right', self.width, self.height, self.keys)
         self.ball = Ball(self.width, self.height, self.keys)
         self.line = Line(self.width, self.height, self.keys)
