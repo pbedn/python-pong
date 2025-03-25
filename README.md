@@ -1,5 +1,7 @@
 ## PONG
 
+**update 2025** - upgraded to work with pyglet 2.1
+
 Files:
 * game.py - procedural version
 * game_oop.py - object oriented version

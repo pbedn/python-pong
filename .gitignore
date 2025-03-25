@@ -4,9 +4,13 @@ __pycache__/
 
 # Environments
 .venv
+venv
 
 # IDE
 .idea
 
 # Pyglet docs
 pyglet-docs
+
+# sublime
+*.sublime*

@@ -2,9 +2,11 @@ import random
 from math import sqrt
 
 import pyglet
-from pyglet.window import key
-from pyglet.gl import *
+from pyglet.window import key, FPSDisplay
+from pyglet import shapes
 
+# DEV_MODE = True
+DEV_MODE = False
 
 # Setup Window
 WIDTH = 800
@@ -17,7 +19,7 @@ window.set_mouse_visible(False)
 WINDOW_WIDTH_HALF = window.width // 2
 WINDOW_HEIGHT_HALF = window.height // 2
 
-fps_display = pyglet.clock.ClockDisplay()
+fps_display = FPSDisplay(window)
 
 main_batch = pyglet.graphics.Batch()
 
@@ -108,23 +110,17 @@ def init(new_game):
     ball_speed = scale_factor // 80
 
 
-def draw_rect(x, y, width, height):
-    glBegin(GL_QUADS)
-    glVertex2f(x, y)
-    glVertex2f(x + width, y)
-    glVertex2f(x + width, y + height)
-    glVertex2f(x, y + height)
-    glEnd()
+def draw_rect(x, y, width, height, color=(255, 255, 255)):
+    rectangle = shapes.Rectangle(x, y, width, height, color=color)
+    rectangle.draw()
 
 
-def draw_line(x1, y1, x2, y2, width=2):
-    glLineStipple(1, 0xFF)
-    glEnable(GL_LINE_STIPPLE)
-    glLineWidth(width)
-    glBegin(GL_LINES)
-    glVertex2f(x1, y1)
-    glVertex2f(x2, y2)
-    glEnd()
+def draw_dashed_line(line_list, x1, y1, x2, y2, batch):
+    y = 0
+    for i in range(y2 // 20):
+        linex = shapes.Line(x1, y, x2, y + 10, thickness=2, color=(255, 255, 255), batch=batch)
+        line_list.append(linex)
+        y = i * 20
 
 
 def ai_player(ball_direction_x, ball_position_y, paddle_y):
@@ -153,7 +149,6 @@ def draw_menu():
 
 def draw_game_objects():
     fps_display.draw()
-    main_batch.draw()
 
     # Draw Paddles
     draw_rect(paddle_left_x, paddle_left_y, paddle_width, paddle_height)
@@ -162,8 +157,9 @@ def draw_game_objects():
     # Draw Ball
     draw_rect(ball_pos_x - ball_size / 2, ball_pos_y - ball_size / 2, ball_size, ball_size)
 
-    # Draw Line
-    draw_line(window.width // 2, 0.0, window.width // 2, window.height)
+    line_list = [] # why bath needs a list here ?
+    draw_dashed_line(line_list, window.width // 2, 0.0, window.width // 2, window.height, batch=main_batch)
+    main_batch.draw()
 
 
 @window.event
@@ -255,7 +251,7 @@ def on_resize(width, height):
     score_right.y = height - height // 10
 
     # Line Resize
-    draw_line(width // 2, 0.0, width // 2, height // 2)
+    draw_dashed_line([], width // 2, 0.0, width // 2, height // 2, batch=main_batch)
 
     # Game Menu
     start_game.font_size = (width+height) // 23
@@ -377,7 +373,7 @@ def update(dt):
 
 
 if __name__ == '__main__':
-    game_menu = True
+    game_menu = True if not DEV_MODE else False
     current_index = 0
     computer_player = True
     play_sounds = True

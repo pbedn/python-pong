@@ -1,9 +1,9 @@
 import random
+from math import sqrt 
 
 import pyglet
+from pyglet import shapes
 from pyglet.window import FPSDisplay, key
-from pyglet.gl import glBegin, glVertex2f, glEnd, GL_QUADS
-from pyglet.gl import glLineStipple, glEnable, glLineWidth, GL_LINE_STIPPLE, GL_LINES
 
 
 class Sounds:
@@ -31,23 +31,14 @@ class Drawing:
         self.computer_player = ai
 
     @staticmethod
-    def draw_rect(x, y, width, height):
-        glBegin(GL_QUADS)
-        glVertex2f(x, y)
-        glVertex2f(x + width, y)
-        glVertex2f(x + width, y + height)
-        glVertex2f(x, y + height)
-        glEnd()
+    def draw_rect(x, y, width, height, color=(255, 255, 255)):
+        rectangle = shapes.Rectangle(x, y, width, height, color=color)
+        rectangle.draw()
 
     @staticmethod
-    def draw_line(x1, y1, x2, y2, width=2):
-        glLineStipple(1, 0xFF)
-        glEnable(GL_LINE_STIPPLE)
-        glLineWidth(width)
-        glBegin(GL_LINES)
-        glVertex2f(x1, y1)
-        glVertex2f(x2, y2)
-        glEnd()
+    def draw_line(x1, y1, x2, y2):
+        line = shapes.Line(x1, y1, x2, y2)
+        line.draw()
 
 
 class Paddle(Drawing):
@@ -172,10 +163,22 @@ class Ball(Drawing):
             self.ball_dir_y = abs(self.ball_dir_y)  # force it to be positive
             if self.sound: self.sound.beep.play()
 
+    def vec2_norm(self, x: int, y: float):
+        global ball_dir_x, ball_dir_y
+        # sets a vectors length to 1 (which means that x + y == 1)
+        length = sqrt((x * x) + (y * y))
+        if length != 1.0:
+            length = 1.0 / length
+            x *= length
+            y *= length
+        ball_dir_y = x
+        ball_dir_y = y
+
     def update(self, scores):
         self.x += self.ball_dir_x * self.ball_speed
         self.y += self.ball_dir_y * self.ball_speed
         self.check_collisions(scores)
+        self.vec2_norm(self.x, self.y)
 
 
 class Line(Drawing):
@@ -189,8 +192,7 @@ class Line(Drawing):
 
     def draw(self):
         self.draw_line(self.x1, self.y1,
-                       self.x2, self.y2,
-                       self.line_width)
+                       self.x2, self.y2)
 
 
 class Score():
@@ -212,9 +214,6 @@ class Score():
 
     def reset(self):
         self.label.text = '0'
-
-    def draw(self):
-        self.label.draw()
 
 
 class MenuItem():
@@ -247,7 +246,7 @@ class Game(pyglet.window.Window):
         self.fps_display = FPSDisplay(self)
         self.keys = key.KeyStateHandler()
 
-        main_batch = pyglet.graphics.Batch()
+        self.main_batch = pyglet.graphics.Batch()
 
         self.ai = True
 
@@ -260,8 +259,8 @@ class Game(pyglet.window.Window):
         self.ball = Ball(self.sounds, self.width, self.height, self.keys)
         self.line = Line(self.width, self.height, self.keys)
 
-        self.score_left = Score('left', self.width, self.height, '0', batch=main_batch)
-        self.score_right = Score('right', self.width, self.height, '0', batch=main_batch)
+        self.score_left = Score('left', self.width, self.height, '0', batch=self.main_batch)
+        self.score_right = Score('right', self.width, self.height, '0', batch=self.main_batch)
         score = {'left': 0, 'right': 0}
         self.scores = [score, self.score_left, self.score_right]
 
@@ -287,8 +286,8 @@ class Game(pyglet.window.Window):
         self.paddle_right.draw()
         self.ball.draw()
         self.line.draw()
-        self.score_left.draw()
-        self.score_right.draw()
+        # self.score_left.draw()
+        # self.score_right.draw()
 
     def on_draw(self):
         self.clear()
@@ -296,6 +295,7 @@ class Game(pyglet.window.Window):
             self.draw_menu()
         else:
             self.draw_game_objects()
+            self.main_batch.draw()
 
     def choose_menu_item(self, symbol, modifier):
         if symbol == key.DOWN:
